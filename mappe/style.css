@@ -36,9 +36,14 @@ body {
     background-color: cadetblue; /* Red color for mines */
 }
 
+.unrevealed {
+    font-size: 0;
+}
+
 /* Optional: Styling for a cell that has been revealed */
 .revealed {
     background-color: bisque; /* Lighter color for revealed cells */
+    font-size: 15px;
 }
 
 /* Styling for flagged cells */
@@ -46,26 +51,3 @@ body {
     background-color: #ff0; /* Yellow color to indicate a flag */
     /* Alternatively, use a background-image with a flag icon */
 }
-
-/* Optional: Add custom colors for each number (1-8) for better visual differentiation */
-.cell[data-value="1"] {
-    color: blue;
-}
-
-.cell[data-value="2"] {
-    color: green;
-}
-
-.cell[data-value="3"] {
-    color: red;
-}
-
-.cell[data-value="4"] {
-    color: navy;
-}
-.cell[data-value="5"] {
-    color: maroon;
-}
-.cell[data-value="6"] { color: teal; }
-.cell[data-value="7"] { color: black; }
-.cell[data-value="8"] { color: gray; }
