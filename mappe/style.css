@@ -13,7 +13,7 @@ body {
     grid-template-columns: repeat(10, 30px); /* Adjust based on the number of columns */
     grid-template-rows: repeat(10, 30px); /* Adjust based on the number of rows */
     gap: 2px; /* Space between cells */
-    margin: 20px auto; /* Center the board horizontally */
+    margin: 5px auto; /* Center the board horizontally */
     border: 3px solid #333; /* Border around the whole board */
 }
 
@@ -51,3 +51,4 @@ body {
     background-color: #ff0; /* Yellow color to indicate a flag */
     /* Alternatively, use a background-image with a flag icon */
 }
+
