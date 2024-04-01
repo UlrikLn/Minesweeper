@@ -173,196 +173,92 @@ if cell > 0 || !cell marked safe
 		next cell
 if no possible moves reveal next cell
 
-
+*/
 
 function minesweepSolver() {
-    let cells = Array.from(document.getElementsByClassName("cell"));
-    let index = 0; // Keep track of the current cell being processed
-    let safeCells = []; // Store safe cells to avoid reprocessing them
+    let cells = document.getElementsByClassName("cell");
+    let safeCells = [];
+    let loopIteration = 0;
+    let bombsFound = 0;
 
-    function processNextCell() {
-        // Base case: stop if all cells have been processed or if the condition to stop is met
-        if (index >= cells.length || countCells >= cells.length) {
-            console.log("Finished processing all cells or game condition met.");
-            return;
-        }
+    while (safeCells.length < cells.length) {
+        console.log("Safe cells:", safeCells.length);
+        console.log("cells length:", cells.length);
+        loopIteration++;
+        console.log("Loop iteration:", loopIteration);
+        for (let i = 0; i < cells.length; i++) {
+            let cell = cells[i];
+            let row = parseInt(cell.dataset.row);
+            let col = parseInt(cell.dataset.col);
+            let x = parseInt(cell.innerHTML);
+            let unrevealedNeighborCells = getUnrevealedNeighborCells(row, col);
+            let flaggedNeighborCells = getFlaggedNeighborCells(row, col);
+            if(row === 0 && col === 0 && cell.classList.contains("unrevealed")){
+                revealCell(row, col);
+                continue;
+            }
 
-        while (countCells < cells.length) {
-            for (let i = 0; i < cells.length; i++) {
-                let cell = cells[i];
-                let row = parseInt(cell.dataset.row);
-                let col = parseInt(cell.dataset.col);
-                let x = parseInt(cell.innerHTML);
-                let unrevealedNeighborCells = getUnrevealedNeighborCells(row, col);
-                let flaggedNeighborCells = getFlaggedNeighborCells(row, col);
+            if(cell.classList.contains("unrevealed")){
+                continue;
+            }
 
+            // If the cell has a flag, skip it
+            if (cell.classList.contains("flagged")){
+                continue;
+            }
 
-                if(row === 0 && col === 0 && cell.classList.contains("unrevealed")){
-                    revealCell(row, col);
-                    continue;
-                }
+            // If the cell is safe, skip it
+            if (safeCells.includes(cell)) {
+                continue;
+            }
 
-                if(cell.classList.contains("unrevealed")){
-                    continue;
-                }
-
-                // If the cell has a flag, skip it
-                if (cell.classList.contains("flagged")){
-                    continue;
-                }
-
-                // If the cell is safe, skip it
-                if (safeCells.includes(cell)) {
-                    continue;
-                }
-
-                // If the cell is a 0, add it to the safeCells array
-                if (x === 0) {
+            // If the cell is a 0, add it to the safeCells array
+            if (x === 0) {
+                safeCells.push(cell);
+                continue;
+            }
+            // If the cell has the same number of unreavealed neighbors as the cell value, flag all unrevealed neighbors
+            if (cell.classList.contains("revealed") && x === unrevealedNeighborCells.length) {
+                for (let j = 0; j < unrevealedNeighborCells.length; j++) {
+                    let neighborCell = unrevealedNeighborCells[j];
+                    if (!neighborCell.classList.contains("flagged")) {
+                        neighborCell.classList.add("flagged");
+                        bombsFound++;
+                    }
                     safeCells.push(cell);
-                    continue;
                 }
-                // If the cell has the same number of unreavealed neighbors as the cell value, flag all unrevealed neighbors
-                if (cell.classList.contains("revealed") && x === unrevealedNeighborCells.length) {
-                    for (let j = 0; j < unrevealedNeighborCells.length; j++) {
-                        let neighborCell = unrevealedNeighborCells[j];
-                        if (!neighborCell.classList.contains("flagged")) {
-                            neighborCell.classList.add("flagged");
-                        }
-                        safeCells.push(cell);
+                continue;
+            }
+            // If the cell has the same number of flagged neighbors as the cell value, reveal all unflagged neighbors
+            if (cell.classList.contains("revealed") && x === flaggedNeighborCells.length) {
+                for (let j = 0; j < unrevealedNeighborCells.length; j++) {
+                    let neighborCell = unrevealedNeighborCells[j];
+                    if (!neighborCell.classList.contains("flagged")) {
+                        revealCell(parseInt(neighborCell.dataset.row), parseInt(neighborCell.dataset.col));
                     }
-                    continue;
+                    safeCells.push(cell);
                 }
-                // If the cell has the same number of flagged neighbors as the cell value, reveal all unflagged neighbors
-                if (cell.classList.contains("revealed") && x === flaggedNeighborCells.length) {
-                    for (let j = 0; j < unrevealedNeighborCells.length; j++) {
-                        let neighborCell = unrevealedNeighborCells[j];
-                        if (!neighborCell.classList.contains("flagged")) {
-                            revealCell(parseInt(neighborCell.dataset.row), parseInt(neighborCell.dataset.col));
-                        }
-                        safeCells.push(cell);
-                    }
-                    continue;
-                }
-
-                // if stuck, reveal nextCell
-                if (i === cells.length - 1) {
-                    for (let j = 0; j < cells.length; j++) {
-                        let nextCell = cells[j];
-                        let nextRow = parseInt(nextCell.dataset.row);
-                        let nextCol = parseInt(nextCell.dataset.col);
-                        if (nextCell.classList.contains("unrevealed")) {
-                            revealCell(nextRow, nextCol);
-                            break;
-                        }
-                    }
-                }
+                continue;
+            }
+            if(loopIteration > 5){
+                findUnrevealedCell().click();
+                loopIteration = 0;
+                continue;
             }
         }
-        console.log(`Processing cell at row ${row}, col ${col}`);
-
-        index++; // Move to the next cell
-        setTimeout(processNextCell, 100); // Wait 100ms before processing the next cell
     }
-
-    processNextCell(); // Start processing cells
 }
 
- */
-
-
-function minesweepSolver() {
-    let cells = Array.from(document.getElementsByClassName("cell"));
-    let safeCells = []; // Store safe cells to avoid reprocessing them
-    let index = 0; // Initialize index for the asynchronous loop
-
-    function processCellAsync() {
-        // Stop condition for the recursion
-        if (index >= cells.length) {
-            console.log("Finished processing all cells.");
-            return;
-        }
-
-        let cell = cells[index];
-        let row = parseInt(cell.dataset.row);
-        let col = parseInt(cell.dataset.col);
-
-        // Only process if cell is not revealed or flagged
-        if (!cell.classList.contains("revealed") && !cell.classList.contains("flagged")) {
-            // Your existing logic to determine if a cell should be revealed or flagged
-            processCell(row, col);
-        }
-
-        index++; // Move to the next cell
-        setTimeout(processCellAsync, 0); // Schedule the next call
-    }
-
-    // Function that encapsulates your cell processing logic
-    function processCell(row, col) {
-        let cell = cells.find(c => parseInt(c.dataset.row) === row && parseInt(c.dataset.col) === col);
-        if (!cell || safeCells.includes(cell)) return;
-
-        let x = parseInt(cell.innerText || "0", 10);
-        let unrevealedNeighborCells = getUnrevealedNeighborCells(row, col);
-        let flaggedNeighborCells = getFlaggedNeighborCells(row, col);
-
-        // Logic to reveal or flag cells based on your criteria
-        if (cell.classList.contains("unrevealed") && x === 0) {
-            revealCell(row, col); // Make sure this function handles asynchronous updates appropriately
-            safeCells.push(cell); // Mark cell as processed
-        }
-        if(cell.classList.contains("unrevealed")){
-        }
-
-        // If the cell has a flag, skip it
-        if (cell.classList.contains("flagged")){
-        }
-
-        // If the cell is safe, skip it
-        if (safeCells.includes(cell)) {
-        }
-
-        // If the cell is a 0, add it to the safeCells array
-        if (x === 0) {
-            safeCells.push(cell);
-        }
-        // If the cell has the same number of unreavealed neighbors as the cell value, flag all unrevealed neighbors
-        if (cell.classList.contains("revealed") && x === unrevealedNeighborCells.length) {
-            for (let j = 0; j < unrevealedNeighborCells.length; j++) {
-                let neighborCell = unrevealedNeighborCells[j];
-                if (!neighborCell.classList.contains("flagged")) {
-                    neighborCell.classList.add("flagged");
-                }
-                safeCells.push(cell);
-            }
-        }
-        // If the cell has the same number of flagged neighbors as the cell value, reveal all unflagged neighbors
-        if (cell.classList.contains("revealed") && x === flaggedNeighborCells.length) {
-            for (let j = 0; j < unrevealedNeighborCells.length; j++) {
-                let neighborCell = unrevealedNeighborCells[j];
-                if (!neighborCell.classList.contains("flagged")) {
-                    revealCell(parseInt(neighborCell.dataset.row), parseInt(neighborCell.dataset.col));
-                }
-                safeCells.push(cell);
-            }
-        }
-
-        // if stuck, reveal nextCell
-        if (i === cells.length - 1) {
-            for (let j = 0; j < cells.length; j++) {
-                let nextCell = cells[j];
-                let nextRow = parseInt(nextCell.dataset.row);
-                let nextCol = parseInt(nextCell.dataset.col);
-                if (nextCell.classList.contains("unrevealed")) {
-                    revealCell(nextRow, nextCol);
-                    break;
-                }
-            }
+function findUnrevealedCell(){
+    let cells = document.getElementsByClassName("cell");
+    for (let i = 0; i < cells.length; i++) {
+        let cell = cells[i];
+        if(cell.classList.contains("unrevealed") && !cell.classList.contains("flagged")){
+            return cell;
         }
     }
-
-    processCellAsync(); // Start processing cells asynchronously
+    return null;
 }
-
 
 function getFlaggedNeighborCells(row, col) {
     let flaggedNeighborCells = [];
@@ -413,43 +309,8 @@ function getUnrevealedNeighborCells(row, col) {
     return unrevealedNeighborCells;
 }
 
-/*
 
-function getFlaggedNeighborCells(row, col){
-    let cells = document.getElementsByClassName("cell");
-    let flaggedNeighborCells = [];
-    for (let i = 0; i < cells.length; i++) {
-        let cell = cells[i];
-        let neighborRow = parseInt(cell.dataset.row);
-        let neighborCol = parseInt(cell.dataset.col);
-        if (neighborRow === row && neighborCol === col) {
-            continue;
-        }
-        if (neighborRow >= row - 1 && neighborRow <= row + 1 && neighborCol >= col - 1 && neighborCol <= col + 1 && getCell(neighborRow, neighborCol).classList.contains("flagged")) {
-            flaggedNeighborCells.push(cell);
-        }
-    }
-    return flaggedNeighborCells;
-}
 
-function getUnrevealedNeighborCells(row, col){
-    let cells = document.getElementsByClassName("cell");
-    let unrevealedNeighborCells = [];
-    for (let i = 0; i < cells.length; i++) {
-        let cell = cells[i];
-        let neighborRow = parseInt(cell.dataset.row);
-        let neighborCol = parseInt(cell.dataset.col);
-        if (neighborRow === row && neighborCol === col) {
-            continue;
-        }
-        if (neighborRow >= row - 1 && neighborRow <= row + 1 && neighborCol >= col - 1 && neighborCol <= col + 1 && getCell(neighborRow, neighborCol).classList.contains("unrevealed")) {
-            unrevealedNeighborCells.push(cell);
-        }
-    }
-    return unrevealedNeighborCells;
-}
-
- */
 
 // ********* MODEL *********
 
