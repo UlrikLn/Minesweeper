@@ -7,7 +7,7 @@ let countCells = 0;
 
 
 document.getElementById("difficulty").addEventListener("change", function() {
-    newGame(); // Start a new game with the new difficulty
+    newGame();
 });
 document.getElementById("board").addEventListener("click", function(event) {
     // Check if the clicked element is a cell
@@ -45,7 +45,7 @@ function revealCell(row, col) {
         cell.classList.add("revealed");
         countCells++;
         if (cell.innerHTML === "0") {
-            revealNeighborCellsWithZero(row, col); // Only call if the cell is "0"
+            revealNeighborCellsWithZero(row, col);
         }
     }
 }
@@ -107,20 +107,18 @@ function revealNeighborCellsWithZero(row, col) {
 }
 
 function gameOver() {
-    // Step 1: Filter out the cells that contain mines.
+
     let cells = Array.from(document.getElementsByClassName("cell"));
     let mineCells = cells.filter(cell => cell.classList.contains("mine"));
 
-    // Step 2: Shuffle the mineCells array to randomize the order.
     for (let i = mineCells.length - 1; i > 0; i--) {
-        let j = Math.floor(Math.random() * (i + 1)); // Random index from 0 to i
-        [mineCells[i], mineCells[j]] = [mineCells[j], mineCells[i]]; // Swap elements
+        let j = Math.floor(Math.random() * (i + 1));
+        [mineCells[i], mineCells[j]] = [mineCells[j], mineCells[i]];
     }
 
-    // Step 3: Apply a setTimeout with a random delay for each mine.
     mineCells.forEach((cell, index) => {
-        // Generate a random delay. For example, between 0 and 5000 milliseconds (5 seconds).
-        let randomDelay = Math.floor(Math.random() * 5000); // Adjust max value as needed
+
+        let randomDelay = Math.floor(Math.random() * 5000);
         setTimeout(() => {
             cell.style.backgroundColor = "red";
         }, randomDelay);
@@ -159,103 +157,7 @@ function newGame(){
 
     console.log("Starting new game with difficulty:", difficulty);
 }
-/*
-Start from first Cell and iterate until done
-for cell
-	if cell = 0
-add cell safe array
-next cell
-let x = cells value
-if cell > 0 || !cell marked safe
-	if cell = x && has x flaggedNeighbors (mine)
-		reveal all unflaggedNeighbors
-	if cell = x && has x unrevealedNeighbors
-		flag all unrevealedNeighbors && unflaggedNeighbors
-	if cell = x && x > unrevealedNeighbors
-		next cell
-if no possible moves reveal next cell
 
-
-
-function minesweepSolver() {
-    let cells = document.getElementsByClassName("cell");
-    let nonMineCells = Array.from(cells).filter(cell => !cell.classList.contains("mine"));
-    let safeCells = new Set();
-    let loopIteration = 0;
-    let bombsFound = 0;
-    let safeCellsArrayFromSet = Array.from(safeCells);
-
-
-            while (safeCells.size < nonMineCells.length) {
-                console.log("Safe cells:", safeCellsArrayFromSet.length);
-                console.log("cells length:", cells.length);
-                loopIteration++;
-                console.log("Loop iteration:", loopIteration);
-                for (let i = 0; i < cells.length; i++) {
-                    let cell = cells[i];
-                    let row = parseInt(cell.dataset.row);
-                    let col = parseInt(cell.dataset.col);
-                    let x = parseInt(cell.innerHTML);
-                    let unrevealedNeighborCells = getUnrevealedNeighborCells(row, col);
-                    let flaggedNeighborCells = getFlaggedNeighborCells(row, col);
-                    if (row === 0 && col === 0 && cell.classList.contains("unrevealed")) {
-                        revealCell(row, col);
-                        continue;
-                    }
-
-                    if (cell.classList.contains("unrevealed")) {
-                        continue;
-                    }
-
-                    // If the cell has a flag, skip it
-                    if (cell.classList.contains("flagged")) {
-                        continue;
-                    }
-
-                    // If the cell is safe, skip it
-                    if (safeCells.has(cell)) {
-                        continue;
-                    }
-
-                    // If the cell is a 0, add it to the safeCells array
-                    if (x === 0) {
-                        safeCells.add(cell);
-                        continue;
-                    }
-                    // If the cell has the same number of unreavealed neighbors as the cell value, flag all unrevealed neighbors
-                    if (cell.classList.contains("revealed") && x === unrevealedNeighborCells.length) {
-                        for (let j = 0; j < unrevealedNeighborCells.length; j++) {
-                            let neighborCell = unrevealedNeighborCells[j];
-                            if (!neighborCell.classList.contains("flagged")) {
-                                neighborCell.classList.add("flagged");
-                                bombsFound++;
-                            }
-                            safeCells.add(cell);
-                        }
-                        continue;
-                    }
-                    // If the cell has the same number of flagged neighbors as the cell value, reveal all unflagged neighbors
-                    if (cell.classList.contains("revealed") && x === flaggedNeighborCells.length) {
-                        for (let j = 0; j < unrevealedNeighborCells.length; j++) {
-                            let neighborCell = unrevealedNeighborCells[j];
-                            if (!neighborCell.classList.contains("flagged")) {
-                                revealCell(parseInt(neighborCell.dataset.row), parseInt(neighborCell.dataset.col));
-                            }
-                            safeCells.add(cell);
-                        }
-                        continue;
-                    }
-                    if (loopIteration > 5) {
-                        findUnrevealedCell().click();
-                        loopIteration = 0;
-                        continue;
-                    }
-                }
-
-            }
-}
-
- */
 
 function minesweepSolver() {
     let cells = document.getElementsByClassName("cell");
@@ -264,9 +166,7 @@ function minesweepSolver() {
     let bombsFound = 0;
 
     let continueProcessing = true;
-    // Process a single step and then schedule the next step
     function solverIteration(loopIteration = 0) {
-        // Base case: Stop when all non-mine cells are found
         if (safeCells.size >= (cells.length - mines.length)) {
             console.log("Solver has finished.");
             continueProcessing = false;
@@ -286,11 +186,13 @@ function minesweepSolver() {
             let x = parseInt(cell.innerHTML);
             let unrevealedNeighborCells = getUnrevealedNeighborCells(row, col);
             let flaggedNeighborCells = getFlaggedNeighborCells(row, col);
+            
             if (row === 0 && col === 0 && cell.classList.contains("unrevealed")) {
                 revealCell(row, col);
                 continue;
             }
 
+            // If the cell is unrevealed, skip it
             if (cell.classList.contains("unrevealed")) {
                 continue;
             }
@@ -376,13 +278,11 @@ function getFlaggedNeighborCells(row, col) {
         { dr: 1, dc: -1 }, { dr: 1, dc: 0 }, { dr: 1, dc: 1 }
     ];
 
-    // Iterate over all possible neighbor positions
     for (const { dr, dc } of neighborPositions) {
         const neighborRow = row + dr;
         const neighborCol = col + dc;
         const neighborCell = getCell(neighborRow, neighborCol);
 
-        // Check if the neighbor cell exists and is flagged
         if (neighborCell && neighborCell.classList.contains("flagged")) {
             flaggedNeighborCells.push(neighborCell);
         }
@@ -391,23 +291,19 @@ function getFlaggedNeighborCells(row, col) {
     return flaggedNeighborCells;
 }
 
-// Use the function for unrevealed neighbors
 function getUnrevealedNeighborCells(row, col) {
     let unrevealedNeighborCells = [];
-    // Define relative positions of all possible neighbors
     const neighborPositions = [
         { dr: -1, dc: -1 }, { dr: -1, dc: 0 }, { dr: -1, dc: 1 },
         { dr: 0, dc: -1 },                     { dr: 0, dc: 1 },
         { dr: 1, dc: -1 }, { dr: 1, dc: 0 }, { dr: 1, dc: 1 }
     ];
 
-    // Iterate over all possible neighbor positions
     for (const { dr, dc } of neighborPositions) {
         const neighborRow = row + dr;
         const neighborCol = col + dc;
         const neighborCell = getCell(neighborRow, neighborCol);
 
-        // Check if the neighbor cell exists and is unrevealed
         if (neighborCell && !neighborCell.classList.contains("revealed")) {
             unrevealedNeighborCells.push(neighborCell);
         }
