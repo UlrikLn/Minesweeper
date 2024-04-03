@@ -5,7 +5,6 @@ console.log("Hello World");
 // ********* CONTROLLER *********
 let countCells = 0;
 
-let isGameOver = false;
 
 document.getElementById("difficulty").addEventListener("change", function() {
     newGame(); // Start a new game with the new difficulty
@@ -112,8 +111,6 @@ function gameOver() {
     let cells = Array.from(document.getElementsByClassName("cell"));
     let mineCells = cells.filter(cell => cell.classList.contains("mine"));
 
-    gameIsOver = true;
-
     // Step 2: Shuffle the mineCells array to randomize the order.
     for (let i = mineCells.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1)); // Random index from 0 to i
@@ -128,6 +125,7 @@ function gameOver() {
             cell.style.backgroundColor = "red";
         }, randomDelay);
     });
+    document.querySelector("#gameOver").style.display = "block";
 }
 
 function checkIfGameIsWon() {
@@ -137,7 +135,7 @@ function checkIfGameIsWon() {
     console.log("Cells without mines:", cellsWithoutMines);
     if (countCells === cellsWithoutMines) {
         console.log("You won!");
-    }
+        document.querySelector("#gameWon").style.display = "block";}
 }
 
 function newGame(){
@@ -272,7 +270,8 @@ function minesweepSolver() {
         if (safeCells.size >= (cells.length - mines.length)) {
             console.log("Solver has finished.");
             continueProcessing = false;
-            return;
+            document.querySelector("#gameWon").style.display = "block";
+        return;
         }
 
         console.log("Safe cells:", safeCells.size);
@@ -335,7 +334,13 @@ function minesweepSolver() {
                 continue;
             }
             if (loopIteration > 5) {
-                findUnrevealedCell().click();
+                let nextCellClick = findUnrevealedCell();
+                if(nextCellClick.classList.contains("mine")){
+                    nextCellClick.click();
+                    continueProcessing = false;
+                    gameOver();
+                }
+                nextCellClick.click();
                 loopIteration = 0;
                 continue;
             }

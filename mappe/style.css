@@ -52,3 +52,23 @@ body {
     /* Alternatively, use a background-image with a flag icon */
 }
 
+#gameOver, #gameWon {
+    display: none; /* Initially hidden */
+    font-size: 48px; /* Big text */
+    color: #FFFFFF; /* White text color */
+    background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+    padding: 20px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10; /* Ensure it's above other elements */
+    text-align: center;
+    width: 80%;
+    border-radius: 10px;
+}
+
+#gameOver h2, #gameWon h2 {
+    margin: 0;
+}
+
