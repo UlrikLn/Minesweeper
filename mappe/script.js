@@ -5,6 +5,8 @@ console.log("Hello World");
 // ********* CONTROLLER *********
 let countCells = 0;
 
+let isGameOver = false;
+
 document.getElementById("difficulty").addEventListener("change", function() {
     newGame(); // Start a new game with the new difficulty
 });
@@ -110,6 +112,8 @@ function gameOver() {
     let cells = Array.from(document.getElementsByClassName("cell"));
     let mineCells = cells.filter(cell => cell.classList.contains("mine"));
 
+    gameIsOver = true;
+
     // Step 2: Shuffle the mineCells array to randomize the order.
     for (let i = mineCells.length - 1; i > 0; i--) {
         let j = Math.floor(Math.random() * (i + 1)); // Random index from 0 to i
@@ -173,16 +177,106 @@ if cell > 0 || !cell marked safe
 		next cell
 if no possible moves reveal next cell
 
-*/
+
 
 function minesweepSolver() {
     let cells = document.getElementsByClassName("cell");
-    let safeCells = [];
+    let nonMineCells = Array.from(cells).filter(cell => !cell.classList.contains("mine"));
+    let safeCells = new Set();
     let loopIteration = 0;
     let bombsFound = 0;
+    let safeCellsArrayFromSet = Array.from(safeCells);
 
-    while (safeCells.length < cells.length) {
-        console.log("Safe cells:", safeCells.length);
+
+            while (safeCells.size < nonMineCells.length) {
+                console.log("Safe cells:", safeCellsArrayFromSet.length);
+                console.log("cells length:", cells.length);
+                loopIteration++;
+                console.log("Loop iteration:", loopIteration);
+                for (let i = 0; i < cells.length; i++) {
+                    let cell = cells[i];
+                    let row = parseInt(cell.dataset.row);
+                    let col = parseInt(cell.dataset.col);
+                    let x = parseInt(cell.innerHTML);
+                    let unrevealedNeighborCells = getUnrevealedNeighborCells(row, col);
+                    let flaggedNeighborCells = getFlaggedNeighborCells(row, col);
+                    if (row === 0 && col === 0 && cell.classList.contains("unrevealed")) {
+                        revealCell(row, col);
+                        continue;
+                    }
+
+                    if (cell.classList.contains("unrevealed")) {
+                        continue;
+                    }
+
+                    // If the cell has a flag, skip it
+                    if (cell.classList.contains("flagged")) {
+                        continue;
+                    }
+
+                    // If the cell is safe, skip it
+                    if (safeCells.has(cell)) {
+                        continue;
+                    }
+
+                    // If the cell is a 0, add it to the safeCells array
+                    if (x === 0) {
+                        safeCells.add(cell);
+                        continue;
+                    }
+                    // If the cell has the same number of unreavealed neighbors as the cell value, flag all unrevealed neighbors
+                    if (cell.classList.contains("revealed") && x === unrevealedNeighborCells.length) {
+                        for (let j = 0; j < unrevealedNeighborCells.length; j++) {
+                            let neighborCell = unrevealedNeighborCells[j];
+                            if (!neighborCell.classList.contains("flagged")) {
+                                neighborCell.classList.add("flagged");
+                                bombsFound++;
+                            }
+                            safeCells.add(cell);
+                        }
+                        continue;
+                    }
+                    // If the cell has the same number of flagged neighbors as the cell value, reveal all unflagged neighbors
+                    if (cell.classList.contains("revealed") && x === flaggedNeighborCells.length) {
+                        for (let j = 0; j < unrevealedNeighborCells.length; j++) {
+                            let neighborCell = unrevealedNeighborCells[j];
+                            if (!neighborCell.classList.contains("flagged")) {
+                                revealCell(parseInt(neighborCell.dataset.row), parseInt(neighborCell.dataset.col));
+                            }
+                            safeCells.add(cell);
+                        }
+                        continue;
+                    }
+                    if (loopIteration > 5) {
+                        findUnrevealedCell().click();
+                        loopIteration = 0;
+                        continue;
+                    }
+                }
+
+            }
+}
+
+ */
+
+function minesweepSolver() {
+    let cells = document.getElementsByClassName("cell");
+    let mines = document.getElementsByClassName("mine");
+    let safeCells = new Set();
+    let bombsFound = 0;
+
+    let continueProcessing = true;
+    // Process a single step and then schedule the next step
+    function solverIteration(loopIteration = 0) {
+        // Base case: Stop when all non-mine cells are found
+        if (safeCells.size >= (cells.length - mines.length)) {
+            console.log("Solver has finished.");
+            continueProcessing = false;
+            return;
+        }
+
+        console.log("Safe cells:", safeCells.size);
+        console.log("cells without bombs:", cells.length - mines.length);
         console.log("cells length:", cells.length);
         loopIteration++;
         console.log("Loop iteration:", loopIteration);
@@ -193,28 +287,28 @@ function minesweepSolver() {
             let x = parseInt(cell.innerHTML);
             let unrevealedNeighborCells = getUnrevealedNeighborCells(row, col);
             let flaggedNeighborCells = getFlaggedNeighborCells(row, col);
-            if(row === 0 && col === 0 && cell.classList.contains("unrevealed")){
+            if (row === 0 && col === 0 && cell.classList.contains("unrevealed")) {
                 revealCell(row, col);
                 continue;
             }
 
-            if(cell.classList.contains("unrevealed")){
+            if (cell.classList.contains("unrevealed")) {
                 continue;
             }
 
             // If the cell has a flag, skip it
-            if (cell.classList.contains("flagged")){
+            if (cell.classList.contains("flagged")) {
                 continue;
             }
 
             // If the cell is safe, skip it
-            if (safeCells.includes(cell)) {
+            if (safeCells.has(cell)) {
                 continue;
             }
 
             // If the cell is a 0, add it to the safeCells array
             if (x === 0) {
-                safeCells.push(cell);
+                safeCells.add(cell);
                 continue;
             }
             // If the cell has the same number of unreavealed neighbors as the cell value, flag all unrevealed neighbors
@@ -225,7 +319,7 @@ function minesweepSolver() {
                         neighborCell.classList.add("flagged");
                         bombsFound++;
                     }
-                    safeCells.push(cell);
+                    safeCells.add(cell);
                 }
                 continue;
             }
@@ -236,17 +330,25 @@ function minesweepSolver() {
                     if (!neighborCell.classList.contains("flagged")) {
                         revealCell(parseInt(neighborCell.dataset.row), parseInt(neighborCell.dataset.col));
                     }
-                    safeCells.push(cell);
+                    safeCells.add(cell);
                 }
                 continue;
             }
-            if(loopIteration > 5){
+            if (loopIteration > 5) {
                 findUnrevealedCell().click();
                 loopIteration = 0;
                 continue;
             }
         }
+        if (continueProcessing) {
+            setTimeout(() => solverIteration(loopIteration + 1), 250); // Adjust the delay as needed
+        } else {
+            console.log("Solver has finished.");
+        }
     }
+
+    solverIteration();
+
 }
 
 function findUnrevealedCell(){
@@ -347,6 +449,7 @@ function populateBoardWithMines(mines){
     for (let i = 0; i < mines; i++) {
         let randomCell = cells[Math.floor(Math.random() * cells.length)];
         randomCell.classList.add("mine");
+        randomCell.classList.add("unrevealed");
     }
 }
 
